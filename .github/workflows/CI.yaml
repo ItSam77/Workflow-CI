@@ -10,6 +10,9 @@ jobs:
   mlflow-pipeline:
     runs-on: ubuntu-latest
     
+    env:
+      MLFLOW_TRACKING_URI: "file:./mlruns"
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -32,7 +35,7 @@ jobs:
     - name: Run mlflow project
       run: |
         cd MLProject
-        export MLFLOW_TRACKING_URI="file:./mlruns"
+        # Run the main modelling script (now CI-aware)
         python modelling.py
         
     - name: Get latest MLflow run_id
