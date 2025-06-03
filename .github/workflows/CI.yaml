@@ -1,0 +1,121 @@
+name: MLflow Project CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  mlflow-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python 3.12.7
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12.7'
+    
+    - name: Check Env
+      run: |
+        python --version
+        pip --version
+        
+    - name: Install dependencies
+      run: |
+        pip install -r MLProject/requirements.txt
+        pip install imbalanced-learn
+        
+    - name: Run mlflow project
+      run: |
+        cd MLProject
+        export MLFLOW_TRACKING_URI="file:./mlruns"
+        python modelling.py
+        
+    - name: Get latest MLflow run_id
+      run: |
+        cd MLProject
+        python -c "
+        import os
+        import json
+        
+        # Check if mlruns directory exists
+        if os.path.exists('mlruns'):
+            # Find the latest run
+            experiments = [d for d in os.listdir('mlruns') if d.isdigit()]
+            if experiments:
+                latest_exp = max(experiments)
+                runs_path = f'mlruns/{latest_exp}'
+                if os.path.exists(runs_path):
+                    runs = [d for d in os.listdir(runs_path) if d != 'meta.yaml']
+                    if runs:
+                        latest_run = max(runs, key=lambda x: os.path.getctime(f'{runs_path}/{x}'))
+                        print(f'Latest MLflow run ID: {latest_run}')
+                        
+                        # Read run metrics if available
+                        metrics_path = f'{runs_path}/{latest_run}/metrics'
+                        if os.path.exists(metrics_path):
+                            print('Model Metrics:')
+                            for metric_file in os.listdir(metrics_path):
+                                with open(f'{metrics_path}/{metric_file}', 'r') as f:
+                                    lines = f.readlines()
+                                    if lines:
+                                        value = lines[-1].split()[1]  # Get latest value
+                                        print(f'  {metric_file}: {value}')
+                    else:
+                        print('No runs found')
+                else:
+                    print('No experiments found')
+            else:
+                print('MLflow tracking not initialized')
+        else:
+            print('MLruns directory not found')
+        "
+        
+    - name: Validate model performance
+      run: |
+        cd MLProject
+        python -c "
+        import pandas as pd
+        from sklearn.model_selection import train_test_split
+        from sklearn.svm import SVC
+        from sklearn.metrics import accuracy_score, f1_score
+        from imblearn.over_sampling import SMOTE
+        import warnings
+        warnings.filterwarnings('ignore')
+        
+        # Load and validate data
+        df = pd.read_csv('processed_data.csv')
+        X = df.drop(columns=['Attrition'])
+        y = df['Attrition']
+        
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42, stratify=y
+        )
+        
+        smote = SMOTE(random_state=42)
+        X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+        
+        model = SVC()
+        model.fit(X_train_resampled, y_train_resampled)
+        y_pred = model.predict(X_test)
+        
+        accuracy = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        
+        print(f'✓ Model Accuracy: {accuracy:.4f}')
+        print(f'✓ Model F1 Score: {f1:.4f}')
+        
+        # Performance validation
+        if accuracy < 0.5:
+            print(f'❌ Accuracy {accuracy:.4f} below threshold (0.5)')
+            exit(1)
+        if f1 < 0.3:
+            print(f'❌ F1 Score {f1:.4f} below threshold (0.3)')
+            exit(1)
+            
+        print('✅ Model performance validation passed')
+        "
