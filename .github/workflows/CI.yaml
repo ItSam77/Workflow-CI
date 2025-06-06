@@ -36,7 +36,7 @@ jobs:
       run: |
         cd MLProject
         # Run the main modelling script (now CI-aware)
-        mlflow run MLProject --env-manager=local
+        python modelling.py
         
     - name: Get latest MLflow run_id
       run: |
