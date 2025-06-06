@@ -11,8 +11,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # --- SETUP MLflow ---
-# mlflow.set_tracking_uri("http://127.0.0.1:5000")  # Local MLflow UI
-# mlflow.set_experiment("Attrition_Models")
+mlflow.set_tracking_uri("http://127.0.0.1:5000")  # Local MLflow UI
+mlflow.set_experiment("Attrition_Models")
 
 # --- LOAD PREPROCESSED DATA ---
 data_path = 'processed_data.csv'
