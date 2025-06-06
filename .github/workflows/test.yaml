@@ -1,0 +1,32 @@
+name: 🔐 Test GitHub Secrets
+
+on:
+  workflow_dispatch  # Bisa dijalankan manual dari GitHub
+
+jobs:
+  test-secrets:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Coba akses secret
+      run: |
+        echo "Testing Docker username..."
+        if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+          echo "❌ Secret DOCKER_USERNAME not found!"
+          exit 1
+        else
+          echo "✅ Secret DOCKER_USERNAME is set."
+        fi
+
+        echo "Testing Docker password/token..."
+        if [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+          echo "❌ Secret DOCKER_PASSWORD not found!"
+          exit 1
+        else
+          echo "✅ Secret DOCKER_PASSWORD is set."
+        fi
+
+        echo "Semua secrets terbaca dengan benar 🎉"
