@@ -85,7 +85,9 @@ jobs:
         path: MLProject/mlruns
 
     - name: Build Docker image
-      run: docker build -t mlflow-run-${{ github.run_id }} .
+      run: |
+        cd MLProject
+        docker build -t mlflow-run-${{ github.run_id }} .
 
     - name: Tag Docker image
       run: docker tag mlflow-run-${{ github.run_id }} ${{ secrets.DOCKER_USERNAME }}/mlflow-run-${{ github.run_id }}
