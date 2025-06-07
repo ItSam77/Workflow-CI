@@ -1,0 +1,23 @@
+name: 🔐 Test Docker Login with Secrets
+
+on:
+  workflow_dispatch  # Bisa dijalankan manual
+
+jobs:
+  docker-login-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repo
+      uses: actions/checkout@v3
+
+    - name: Try Docker login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: List Docker Hub images (test step)
+      run: |
+        echo "Login success. Now listing local images..."
+        docker images || echo "❌ Login failed or no images found"
