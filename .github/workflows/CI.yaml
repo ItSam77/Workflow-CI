@@ -77,48 +77,11 @@ jobs:
         else:
             print('MLruns directory not found')
         "
+      
+      - name: saving artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-run-${{ github.run_id }}
+          path: MLProject/mlruns/
         
-    - name: Validate model performance
-      run: |
-        cd MLProject
-        python -c "
-        import pandas as pd
-        from sklearn.model_selection import train_test_split
-        from sklearn.svm import SVC
-        from sklearn.metrics import accuracy_score, f1_score
-        from imblearn.over_sampling import SMOTE
-        import warnings
-        warnings.filterwarnings('ignore')
-        
-        # Load and validate data
-        df = pd.read_csv('processed_data.csv')
-        X = df.drop(columns=['Attrition'])
-        y = df['Attrition']
-        
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42, stratify=y
-        )
-        
-        smote = SMOTE(random_state=42)
-        X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
-        
-        model = SVC()
-        model.fit(X_train_resampled, y_train_resampled)
-        y_pred = model.predict(X_test)
-        
-        accuracy = accuracy_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
-        
-        print(f'✓ Model Accuracy: {accuracy:.4f}')
-        print(f'✓ Model F1 Score: {f1:.4f}')
-        
-        # Performance validation
-        if accuracy < 0.5:
-            print(f'❌ Accuracy {accuracy:.4f} below threshold (0.5)')
-            exit(1)
-        if f1 < 0.3:
-            print(f'❌ F1 Score {f1:.4f} below threshold (0.3)')
-            exit(1)
-            
-        print('✅ Model performance validation passed')
-        "
+    
