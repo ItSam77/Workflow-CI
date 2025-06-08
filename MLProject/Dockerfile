@@ -4,8 +4,9 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir mlflow imbalanced-learn
 
 COPY . .
 
-CMD ["conda", "run", "-n", "mlflow-env", "uvicorn", "inference:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 5000
