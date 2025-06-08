@@ -81,7 +81,7 @@ jobs:
     - name: Saving artifact to GitHub Actions
       uses: actions/upload-artifact@v4
       with:
-        name: mlflow-run-${{ github.run_id }}
+        name: mlflow-run-itsam77
         path: MLProject/mlruns
 
     - name: Build Docker image
@@ -90,7 +90,7 @@ jobs:
         docker build -t mlflow-run-itsam77 .
 
     - name: Tag Docker image
-      run: docker tag mlflow-run-${{ github.run_id }} ${{ secrets.DOCKER_USERNAME }}/mlflow-run-${{ github.run_id }}
+      run: docker tag mlflow-run-itsam77 ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77
 
     - name: Log into Docker Hub
       uses: docker/login-action@v2
@@ -99,7 +99,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Push Docker image to Docker Hub
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-run-${{ github.run_id }}
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77
 
             
             
