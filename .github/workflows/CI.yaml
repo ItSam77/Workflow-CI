@@ -84,49 +84,23 @@ jobs:
         name: mlflow-run-itsam77
         path: MLProject/mlruns
 
-    - name: Get latest model path
-      id: model_path
-      run: |
-        cd MLProject
-        MODEL_PATH=$(python -c "
-        import os
-        import mlflow
-        
-        mlflow.set_tracking_uri('file:./mlruns')
-        experiment = mlflow.get_experiment_by_name('Attrition_Models')
-        
-        if experiment:
-            runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id], order_by=['start_time DESC'], max_results=1)
-            if not runs.empty:
-                latest_run_id = runs.iloc[0]['run_id']
-                model_path = f'mlartifacts/{experiment.experiment_id}/{latest_run_id}/artifacts/model'
-                print(model_path)
-            else:
-                print('No runs found')
-                exit(1)
-        else:
-            print('Experiment not found')
-            exit(1)
-        ")
-        echo "model_path=$MODEL_PATH" >> $GITHUB_OUTPUT
-        echo "Latest model path: $MODEL_PATH"
-
-    - name: Build Docker image with MLflow
-      run: |
-        cd MLProject
-        mlflow models build-docker -m ${{ steps.model_path.outputs.model_path }} -n ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77:${{ github.run_id }}
-        docker tag ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77:${{ github.run_id }} ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77:latest
-
     - name: Log into Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Push Docker image to Docker Hub
+    - name: Build Docker image
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77:${{ github.run_id }}
-        docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77:latest
+        cd MLProject
+        docker build -t mlflow-run-itsam77 .
+
+    - name: Tag Docker image
+      run: docker tag mlflow-run-itsam77 ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77
+
+
+    - name: Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77:latest
 
             
             
