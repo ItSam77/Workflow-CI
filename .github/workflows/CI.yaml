@@ -2,9 +2,9 @@ name: MLflow Project CI
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+    paths:
+      - "MLProject/**"
+      - ".github/workflows/CI.yaml"
 
 jobs:
   mlflow-pipeline:
