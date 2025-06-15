@@ -11,9 +11,9 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # --- SETUP MLflow ---
-# Use file-based tracking for CI compatibility
-mlflow.set_tracking_uri("file:./mlruns")
-mlflow.set_experiment("Attrition_Models")
+# # Use file-based tracking for CI compatibility
+# mlflow.set_tracking_uri("file:./mlruns")
+# mlflow.set_experiment("Attrition_Models")
 
 # --- LOAD PREPROCESSED DATA ---
 data_path = 'processed_data.csv'
