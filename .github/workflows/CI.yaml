@@ -40,43 +40,9 @@ jobs:
         
     - name: Get latest MLflow run_id
       run: |
-        cd MLProject
-        python -c "
-        import os
-        import json
-        
-        # Check if mlruns directory exists
-        if os.path.exists('mlruns'):
-            # Find the latest run
-            experiments = [d for d in os.listdir('mlruns') if d.isdigit()]
-            if experiments:
-                latest_exp = max(experiments)
-                runs_path = f'mlruns/{latest_exp}'
-                if os.path.exists(runs_path):
-                    runs = [d for d in os.listdir(runs_path) if d != 'meta.yaml']
-                    if runs:
-                        latest_run = max(runs, key=lambda x: os.path.getctime(f'{runs_path}/{x}'))
-                        print(f'Latest MLflow run ID: {latest_run}')
-                        
-                        # Read run metrics if available
-                        metrics_path = f'{runs_path}/{latest_run}/metrics'
-                        if os.path.exists(metrics_path):
-                            print('Model Metrics:')
-                            for metric_file in os.listdir(metrics_path):
-                                with open(f'{metrics_path}/{metric_file}', 'r') as f:
-                                    lines = f.readlines()
-                                    if lines:
-                                        value = lines[-1].split()[1]  # Get latest value
-                                        print(f'  {metric_file}: {value}')
-                    else:
-                        print('No runs found')
-                else:
-                    print('No experiments found')
-            else:
-                print('MLflow tracking not initialized')
-        else:
-            print('MLruns directory not found')
-        "
+        RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+        echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+        echo "Latest run_id: $RUN_ID"
     
     - name: Saving artifact to GitHub Actions
       uses: actions/upload-artifact@v4
@@ -92,8 +58,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        cd MLProject
-        docker build -t mlflow-run-itsam77 .
+        mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "mlflow-run-itsam77"
 
     - name: Tag Docker image
       run: docker tag mlflow-run-itsam77 ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77
