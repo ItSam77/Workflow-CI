@@ -2,20 +2,22 @@ name: MLflow Project CI
 
 on:
   push:
-    paths:
-      - "MLProject/**"
-      - ".github/workflows/CI.yaml"
+    branches:
+      - main
+    pull_request:
+      branches:
+        - main
 
 jobs:
   mlflow-pipeline:
     runs-on: ubuntu-latest
     
-    env:
-      MLFLOW_TRACKING_URI: "file:./mlruns"
+    # env:
+    #   MLFLOW_TRACKING_URI: "file:./mlruns"
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    
+    - uses: actions/checkout@v3
     
     - name: Set up Python 3.12.7
       uses: actions/setup-python@v4
