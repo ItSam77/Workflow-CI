@@ -39,6 +39,7 @@ with mlflow.start_run(run_name="SVM_Employee_Attrition_No_Hyperparameter_Tuning"
     model.fit(X_train_resampled, y_train_resampled)
 
     y_pred = model.predict(X_test)
+    mlflow.sklearn.log_model(model, "model")
 
     print("--- Evaluation ---")
     print(f"Accuracy : {accuracy_score(y_test, y_pred):.4f}")
