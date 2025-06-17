@@ -5,8 +5,8 @@ conda_env: conda.yaml
 entry_points:
   main:
     parameters:
-      n_estimators: {type: int, default: 505}
-      max_depth: {type: int, default: 35}
+      c_param: {type: int, default: 1.0}
+      kernel_param: {type: string, default: "rbf"}
       dataset : {type: string, default: "processed_data.csv"}
     command: >
-      python modelling.py {n_estimators} {max_depth} {dataset} 
+      python modelling.py {c_param} {kernel_param} {dataset} 
