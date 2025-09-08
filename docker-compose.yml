@@ -1,0 +1,15 @@
+services:
+  mlflow:
+    image: itsam77/mlflow-tracking:latest
+    container_name: mlflow
+    restart: unless-stopped
+    ports:
+      - "5000:5000"     # host:container
+    volumes:
+      - ./data:/app     # simpan mlruns.db & artifacts
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:///mlruns.db
+      --default-artifact-root file:/app/mlruns

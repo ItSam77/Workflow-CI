@@ -1,72 +1,33 @@
-name: MLflow Project CI
+name: Build & Push MLflow Image
 
 on:
   push:
-    branches:
-      - main
-    pull_request:
-      branches:
-        - main
+    branches: [ "main" ]
+    paths:
+      - "Dockerfile"
+      - ".github/workflows/CI.yaml"
+  workflow_dispatch: {}
 
 jobs:
-  mlflow-pipeline:
+  build-and-push:
     runs-on: ubuntu-latest
-    
-    # env:
-    #   MLFLOW_TRACKING_URI: "file:./mlruns"
-    
+
     steps:
-    
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python 3.12.7
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12.7'
-    
-    - name: Check Env
-      run: |
-        python --version
-        pip --version
-        
-    - name: Install dependencies
-      run: |
-        pip install -r MLProject/requirements.txt
-        pip install imbalanced-learn
-        
-    - name: Run mlflow project
-      run: |
-        mlflow run MLProject --env-manager local
-        
-    - name: Get latest MLflow run_id
-      run: |
-        RUN_ID=$(ls -td mlruns/0/*/ | grep -Eo 'mlruns/0/[a-f0-9]{32}/' | head -n 1 | cut -d'/' -f3)
-        echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-        echo "Latest run_id: $RUN_ID"
-    
-    - name: Saving artifact to GitHub Actions
-      uses: actions/upload-artifact@v4
-      with:
-        name: mlflow-run-itsam77
-        path: mlruns/0/${{ env.RUN_ID }}
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Log into Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build Docker image
-      run: |
-        mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "mlflow-run-itsam77"
+      - name: Build image
+        run: |
+          docker build -t ${{ secrets.DOCKER_IMAGE }}:latest .
+          docker tag  ${{ secrets.DOCKER_IMAGE }}:latest ${{ secrets.DOCKER_IMAGE }}:${{ github.sha }}
 
-    - name: Tag Docker image
-      run: docker tag mlflow-run-itsam77 ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77
-
-
-    - name: Push Docker image to Docker Hub
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/mlflow-run-itsam77:latest
-
-            
-            
-        
+      - name: Push image
+        run: |
+          docker push ${{ secrets.DOCKER_IMAGE }}:latest
+          docker push ${{ secrets.DOCKER_IMAGE }}:${{ github.sha }}
