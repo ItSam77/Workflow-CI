@@ -32,6 +32,10 @@ kernel_param = "rbf"
 # --- MLflow Logging ---
 input_example = X_train.head(5)
 
+# --- Custom MLflow Tracking URI ---
+remote_server_uri = "http://82.197.71.171:5000"
+mlflow.set_tracking_uri(remote_server_uri)
+
 with mlflow.start_run(run_name="SVM_Attrition_Manual_Log"):
     model = SVC(C=C_param, kernel=kernel_param, probability=True)
     model.fit(X_train_resampled, y_train_resampled)
