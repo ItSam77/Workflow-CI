@@ -33,7 +33,7 @@ kernel_param = "rbf"
 input_example = X_train.head(5)
 
 # --- Custom MLflow Tracking URI ---
-remote_server_uri = "http://82.197.71.171:5000"
+remote_server_uri = "http://0.0.0.0:5000"
 mlflow.set_tracking_uri(remote_server_uri)
 
 with mlflow.start_run(run_name="SVM_Attrition_Manual_Log"):
