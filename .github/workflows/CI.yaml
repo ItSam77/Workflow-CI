@@ -29,5 +29,5 @@ jobs:
 
       - name: Push image
         run: |
-          docker push ${{ secrets.DOCKER_IMAGE }}s:latest
-          docker push ${{ secrets.DOCKER_IMAGE }}s:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_IMAGE }}:latest
+          docker push ${{ secrets.DOCKER_IMAGE }}:${{ github.sha }}
