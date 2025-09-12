@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-WORKDIR app/MLProject
+WORKDIR /app/MLProject
 
 COPY MLProject/ .
 
