@@ -1,11 +1,8 @@
 FROM python:3.10-slim
-
-WORKDIR /app/MLProject
+WORKDIR /app
 
 COPY MLProject/ .
-
-RUN pip install --no-cache-dir -r MLProject/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
-
-CMD ["python","MLProject/modelling.py"]
+CMD ["python", "modelling.py"] 
